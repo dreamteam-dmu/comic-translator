@@ -250,14 +250,17 @@ const FileUploader = () => {
 
     const handleDownload = () => {
         if (!resultBlob) return;
-        const url = URL.createObjectURL(resultBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'translated-image.png';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const a = document.createElement('a');
+            a.href = reader.result; // base64 URL
+            a.download = 'translated-image.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        };
+        reader.readAsDataURL(resultBlob);
     };
 
     return (
