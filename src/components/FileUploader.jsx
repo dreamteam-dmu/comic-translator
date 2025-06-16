@@ -1,112 +1,48 @@
+// FileUploader.jsx
+
 import { useState } from 'react';
 import styled from 'styled-components';
 import UploaderForm from './UploaderForm';
 import { UploadButton } from './UploadButton';
 import { FaRegImage } from 'react-icons/fa';
 import { formatFileSize } from '../utils/formatFileSize';
-import sample from '../assets/sample.png';
+import { Spinner } from './Spinner';
 
-const ModalFooter = styled.div`
-    display: flex;
-    width: 100%;
-    border-top: 1px solid #ececec;
-    background: #fff;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    border-radius: 0 0 16px 16px;
-    overflow: hidden;
-`;
-
-const FooterButton = styled.button`
-    flex: 1;
-    padding: 1rem 0;
-    font-size: 1.07rem;
-    font-weight: 500;
-    border: none;
-    background: ${({ primary }) =>
-        primary ? '#222' : '#f6f6f6'};
-    color: ${({ primary }) => (primary ? '#fff' : '#666')};
-    cursor: pointer;
-    transition: background 0.15s;
-    border-right: ${({ primary }) =>
-        primary ? 'none' : '1px solid #ececec'};
-
-    &:active {
-        background: ${({ primary }) =>
-            primary ? '#111' : '#ececec'};
-    }
-`;
-
-const ModalBackdrop = styled.div`
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.35);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
-    padding: 1.5rem; /* 상단 패딩을 2.5rem 이상으로 */
-    max-width: 80vw;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-`;
-
-const ModalImage = styled.img`
+const StyledImage = styled.img`
     width: 100%;
     max-width: 320px;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     object-fit: cover;
-    margin-bottom: 1.2rem;
-    margin-top: 1.5rem; /* 상단에 여유를 줌 */
-    box-sizing: border-box;
-    padding: 0 10px;
-`;
+    display: block;
 
-const CloseButton = styled.button`
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.6rem;
-    color: #888;
-    cursor: pointer;
-    z-index: 2; /* 혹시 모를 겹침 방지 */
-    transition: color 0.2s;
-    &:hover {
-        color: #333;
+    @media (max-width: 600px) {
+        max-width: 98vw;
+        margin-top: 1rem;
     }
 `;
 
 const FileInfoCard = styled.div`
     display: flex;
     align-items: center;
-    margin-top: 20px;
     gap: 1rem;
     background: #fff;
     border: 1.5px solid #e5e7eb;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     padding: 1.2rem 1.5rem;
+    margin-top: 1.5rem;
     box-sizing: border-box;
     width: 100%;
-    max-width: 420px;
+    max-width: 350px;
     margin-left: auto;
     margin-right: auto;
+
+    @media (max-width: 600px) {
+        max-width: 98vw;
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
 `;
 
 const FileIcon = styled.div`
@@ -118,18 +54,52 @@ const FileIcon = styled.div`
     justify-content: center;
     font-size: 2rem;
     color: #6366f1;
+
+    @media (max-width: 600px) {
+        font-size: 1.5rem;
+        padding: 0.5rem;
+    }
+`;
+
+const FileDetails = styled.div`
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    .filename {
+        font-weight: 600;
+        font-size: 1.05rem;
+        color: #222;
+        margin-bottom: 0.1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+        display: block;
+    }
+    .meta {
+        font-size: 0.96rem;
+        color: #666;
+    }
+
+    @media (max-width: 600px) {
+        .filename {
+            font-size: 1rem;
+        }
+        .meta {
+            font-size: 0.9rem;
+        }
+    }
 `;
 
 const Slogan = styled.h1`
-    font-size: 1.7rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: #222;
-    margin: 0px;
+    margin-bottom: 0.5rem;
     line-height: 1.3;
     text-align: left;
     letter-spacing: -0.02em;
-    word-break: keep-all;
-    overflow-wrap: break-word;
 
     @media (max-width: 600px) {
         font-size: 1.5rem;
@@ -138,136 +108,159 @@ const Slogan = styled.h1`
 `;
 
 const SubText = styled.p`
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     color: #666;
+    margin: 0.5rem 0 1.5rem 0;
     text-align: left;
-    word-break: keep-all;
-    overflow-wrap: break-word;
 
     @media (max-width: 600px) {
+        font-size: 1rem;
         text-align: center;
     }
 `;
 
-const FileDetails = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
-    flex: 1;
-    word-break: keep-all;
-    overflow-wrap: break-word;
-
-    .filename,
-    .meta {
-        font-size: 1.05rem;
-        color: #222;
-        white-space: normal;
-        word-break: keep-all;
-        overflow-wrap: break-word;
-        /* 필요하다면 text-overflow, overflow, white-space 속성 조정 */
-    }
-`;
-
 const Layout = styled.div`
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: #f9fafb;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    padding: 2rem 0;
+
+    @media (max-width: 600px) {
+        padding: 1rem 0;
+    }
 `;
 
 const ContentContainer = styled.div`
     width: 100%;
-    max-width: 420px;
+    max-width: 350px; /* 통일! */
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    padding: 0 1rem;
-    box-sizing: border-box;
     align-items: center;
+    justify-content: center;
+    padding: 0; // <= padding 제거
+    box-sizing: border-box;
+
+    @media (max-width: 600px) {
+        max-width: 98vw; /* 모바일에서는 화면 거의 꽉 차게 */
+        padding: 0 0.5rem;
+    }
+`;
+
+const FooterButton = styled.button`
+    width: 100%;
+    max-width: 350px;
+    padding: 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    background: #6366f1;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+
+    &:hover,
+    &:focus {
+        background: #4f46e5;
+        outline: none;
+    }
+
+    &:active {
+        background: #4338ca;
+    }
+
+    @media (max-width: 600px) {
+        max-width: 98vw;
+        padding: 0.8rem 0;
+        font-size: 1rem;
+    }
+`;
+
+const ModalImage = styled.img`
+    width: 100%;
+    max-width: 350px; /* 통일! */
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    object-fit: cover;
+    display: block;
+
+    @media (max-width: 600px) {
+        max-width: 98vw;
+    }
 `;
 
 const FileUploader = () => {
     const [file, setFile] = useState(null);
     const [preview, setPreview] = useState(null);
-    const [showModal, setShowModal] = useState(true); // 최초 접속 시 모달 보임
+    const [resultUrl, setResultUrl] = useState(null);
+    const [resultBlob, setResultBlob] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const handleFileChange = (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const selectedFile = e.target.files[0];
+        const selectedFile = e.target.files[0];
+        if (selectedFile) {
             setFile(selectedFile);
 
-            // 이미지 파일이면 미리보기 생성
             if (selectedFile.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     setPreview(reader.result);
                 };
                 reader.readAsDataURL(selectedFile);
-            } else {
-                setPreview(null);
             }
         }
     };
 
     const handleUpload = async () => {
         if (!file) return;
+        setLoading(true); // 업로드 시작 시 로딩 활성화
+
         const formData = new FormData();
         formData.append('file', file);
 
-        await fetch('/api/upload', {
-            method: 'POST',
-            body: formData,
-        });
-        alert('업로드 완료!');
-        setFile(null);
-        setPreview(null);
+        try {
+            const response = await fetch('/api/translate', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('업로드 실패');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            setResultUrl(url);
+            setResultBlob(blob);
+
+            setFile(null);
+            setPreview(null);
+        } catch (error) {
+            console.error('오류 발생:', error);
+            alert('업로드 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false); // 업로드 종료 시 로딩 비활성화
+        }
+    };
+
+    const handleDownload = () => {
+        if (!resultBlob) return;
+        const url = URL.createObjectURL(resultBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'translated-image.png';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
     };
 
     return (
         <Layout>
-            {showModal && (
-                <ModalBackdrop>
-                    <ModalContent>
-                        <CloseButton
-                            onClick={() =>
-                                setShowModal(false)
-                            }
-                            aria-label='닫기'
-                        >
-                            ×
-                        </CloseButton>
-                        <ModalImage
-                            src={sample}
-                            alt='예시 이미지'
-                        />
-                        <div
-                            style={{
-                                textAlign: 'center',
-                                color: '#333',
-                                fontSize: '1.05rem',
-                            }}
-                        >
-                            원본 만화와 번역본을 한눈에
-                            비교해보세요. <br />
-                            AI가 대사를 한국어로 전달해
-                            드립니다. <br />
-                            지금 바로 AI 번역으로 새롭게
-                            만나보세요!
-                        </div>
-                    </ModalContent>
-                </ModalBackdrop>
-            )}
-
             <ContentContainer>
                 <Slogan>
                     만화, 이제 AI가 바로 번역해 드려요!
@@ -276,13 +269,18 @@ const FileUploader = () => {
                     쉽고 빠른 만화 번역, 감동을 실시간으로
                     경험하세요.
                 </SubText>
-                {/* <StyledImage src={sample} alt='예시' /> 삭제 */}
-                <UploaderForm
-                    onChange={handleFileChange}
-                    preview={preview}
-                />
+                {!file && (
+                    <UploaderForm
+                        onChange={handleFileChange}
+                        preview={preview}
+                    />
+                )}
                 {file && (
                     <>
+                        <StyledImage
+                            src={preview}
+                            alt='미리보기'
+                        />
                         <FileInfoCard>
                             <FileIcon>
                                 <FaRegImage />
@@ -300,10 +298,38 @@ const FileUploader = () => {
                         </FileInfoCard>
                         <UploadButton
                             onClick={handleUpload}
+                            disabled={loading}
                         >
-                            업로드
+                            {loading ? (
+                                <>
+                                    <Spinner />
+                                    번역 중...
+                                </>
+                            ) : (
+                                '번역하기'
+                            )}
                         </UploadButton>
                     </>
+                )}
+                {resultUrl && (
+                    <div
+                        style={{
+                            marginTop: 32,
+                            textAlign: 'center',
+                        }}
+                    >
+                        <ModalImage
+                            src={resultUrl}
+                            alt='번역 결과 미리보기'
+                        />
+                        <div style={{ marginTop: 16 }}>
+                            <FooterButton
+                                onClick={handleDownload}
+                            >
+                                번역 이미지 다운로드
+                            </FooterButton>
+                        </div>
+                    </div>
                 )}
             </ContentContainer>
         </Layout>
