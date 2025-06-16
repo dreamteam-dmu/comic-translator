@@ -1,3 +1,5 @@
+// UploaderForm.jsx
+
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
@@ -78,13 +80,11 @@ const UploaderForm = ({ onChange, preview }) => {
 };
 
 const StyledWrapper = styled.div`
-    width: 100%;
-    max-width: 420px;
-    margin-top: 20px;
-
     .custum-file-upload {
         height: 250px;
         width: 100%;
+        max-width: 350px; /* 통일! */
+        margin: 0 auto;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -94,11 +94,18 @@ const StyledWrapper = styled.div`
         cursor: pointer;
         border: 2px dashed #cacaca;
         background-color: #fff;
-        padding: 1.5rem;
+        padding: 1rem; /* 또는 동일한 값 */
         border-radius: 10px;
         box-shadow: 0px 48px 35px -48px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         position: relative;
+        transition: border-color 0.2s, background-color 0.2s;
+
+        @media (max-width: 600px) {
+            max-width: 98vw; /* 모바일에서는 화면 거의 꽉 차게 */
+            height: 180px;
+            padding: 1rem;
+        }
     }
 
     .custum-file-upload.drag-active {
@@ -119,18 +126,25 @@ const StyledWrapper = styled.div`
     }
 
     .custum-file-upload .icon img {
-        max-width: 100%;
-        max-height: 100%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-        border-radius: 8px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: none;
     }
 
     .custum-file-upload .icon svg {
         width: 80px;
         height: 80px;
         fill: rgba(75, 85, 99, 1);
+
+        @media (max-width: 600px) {
+            width: 56px;
+            height: 56px;
+        }
     }
 
     .custum-file-upload .text {
@@ -143,7 +157,6 @@ const StyledWrapper = styled.div`
     .custum-file-upload .text span {
         font-weight: 400;
         color: rgba(75, 85, 99, 1);
-        font-size: 1rem;
     }
 
     .custum-file-upload input {

@@ -1,10 +1,15 @@
+// UploadButton.jsx
+
 import styled from 'styled-components';
 
 export const UploadButton = styled.button`
     width: 100%;
-    margin-top: 20px;
-    max-width: 420px;
+    max-width: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 1rem 0;
+    margin-top: 28px;
     font-size: 1.1rem;
     font-weight: 600;
     color: #4b5563;
@@ -29,5 +34,15 @@ export const UploadButton = styled.button`
         background: #e5e7eb;
         color: #1e293b;
         border-color: #a5b4fc;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+        max-width: 98vw;
+        padding: 0.8rem 0;
+        font-size: 1rem;
     }
 `;
