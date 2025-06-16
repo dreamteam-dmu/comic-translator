@@ -225,7 +225,7 @@ const FileUploader = () => {
 
         try {
             const response = await fetch(
-                `/${backend}/translate`,
+                `${backend}/translate`,
                 {
                     method: 'POST',
                     body: formData,
