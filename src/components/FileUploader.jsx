@@ -224,13 +224,10 @@ const FileUploader = () => {
         formData.append('file', file);
 
         try {
-            const response = await fetch(
-                `${backend}/translate`,
-                {
-                    method: 'POST',
-                    body: formData,
-                }
-            );
+            const response = await fetch(`${backend}`, {
+                method: 'POST',
+                body: formData,
+            });
 
             if (!response.ok) {
                 throw new Error('업로드 실패');
