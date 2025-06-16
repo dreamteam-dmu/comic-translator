@@ -199,6 +199,7 @@ const FileUploader = () => {
     const [resultUrl, setResultUrl] = useState(null);
     const [resultBlob, setResultBlob] = useState(null);
     const [loading, setLoading] = useState(false);
+    const backend = import.meta.env.VITE_API_URL;
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -223,10 +224,13 @@ const FileUploader = () => {
         formData.append('file', file);
 
         try {
-            const response = await fetch('/api/translate', {
-                method: 'POST',
-                body: formData,
-            });
+            const response = await fetch(
+                `/${backend}/translate`,
+                {
+                    method: 'POST',
+                    body: formData,
+                }
+            );
 
             if (!response.ok) {
                 throw new Error('업로드 실패');
