@@ -10,7 +10,7 @@ import { Spinner } from './Spinner';
 
 const StyledImage = styled.img`
     width: 100%;
-    max-width: 320px;
+    max-width: 350px;
     border-radius: 14px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     object-fit: cover;
